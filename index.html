@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품 페이지 SEO/AEO/GEO 진단 도구 v4</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0f0f11;
+  --bg2: #17171a;
+  --bg3: #1e1e22;
+  --border: #2a2a30;
+  --border2: #3a3a42;
+  --text: #e8e8ec;
+  --text2: #9090a0;
+  --text3: #5a5a6a;
+  --accent: #6c63ff;
+  --accent2: #8b84ff;
+  --teal: #2dd4bf;
+  --coral: #ff6b6b;
+  --amber: #fbbf24;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --r: 10px;
+  --r2: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── 레이아웃 ── */
+.shell {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+/* ── 헤더 ── */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.header-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent2);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 4px 14px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.header h1 {
+  font-size: clamp(22px, 5vw, 32px);
+  font-weight: 700;
+  line-height: 1.3;
+  background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.header p {
+  font-size: 14px;
+  color: var(--text2);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── 진행 스텝 ── */
+.steps-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  transition: all .25s;
+  flex-shrink: 0;
+}
+.step-label {
+  font-size: 12px;
+  color: var(--text3);
+  white-space: nowrap;
+  transition: color .25s;
+}
+.step-sep {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+.step-item.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.step-item.active .step-label { color: var(--text); font-weight: 500; }
+.step-item.done .step-num {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+.step-item.done .step-label { color: var(--teal); }
+
+/* ── 카드 ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-title .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.card-desc {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 24px;
+  padding-left: 42px;
+}
+
+/* ── 폼 요소 ── */
+.field { margin-bottom: 20px; }
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field-label .pts {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent2);
+  background: rgba(108,99,255,.15);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.field-label .required {
+  color: var(--coral);
+  font-size: 11px;
+}
+
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  transition: border-color .2s;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="text"]:focus, input[type="number"]:focus,
+textarea:focus, select:focus {
+  border-color: var(--accent);
+}
+textarea { resize: vertical; min-height: 70px; }
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239090a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* 라디오/체크 그룹 */
+.radio-group, .check-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.radio-group label, .check-group label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: all .2s;
+  user-select: none;
+}
+.radio-group label:hover, .check-group label:hover {
+  border-color: var(--border2);
+}
+.radio-group input, .check-group input { display: none; }
+.radio-group label.selected, .check-group label.selected {
+  background: rgba(108,99,255,.18);
+  border-color: var(--accent);
+  color: var(--accent2);
+  font-weight: 500;
+}
+
+/* 힌트 박스 */
+.hint {
+  background: rgba(45,212,191,.06);
+  border: 1px solid rgba(45,212,191,.2);
+  border-radius: var(--r2);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--teal);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.hint b { font-weight: 600; }
+
+.warn {
+  background: rgba(251,191,36,.06);
+  border: 1px solid rgba(251,191,36,.2);
+  border-radius: var(--r2);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--amber);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── 네비 버튼 ── */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  gap: 12px;
+}
+.btn {
+  padding: 11px 28px;
+  border-radius: var(--r2);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+}
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--text2); color: var(--text); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  flex: 1;
+  max-width: 280px;
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-result {
+  background: linear-gradient(135deg, var(--teal), var(--accent));
+  color: #fff;
+  flex: 1;
+  max-width: 280px;
+  font-weight: 700;
+}
+.btn-result:hover { opacity: .9; transform: translateY(-1px); }
+
+/* ── 결과 화면 ── */
+.result-hidden { display: none; }
+
+.score-board {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.score-board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.score-total {
+  font-size: clamp(56px, 12vw, 80px);
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff, var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.score-max { font-size: 20px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.score-grade {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 6px 20px;
+  border-radius: 20px;
+  margin: 16px 0 8px;
+}
+.grade-good { background: rgba(74,222,128,.15); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
+.grade-mid  { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.grade-bad  { background: rgba(255,107,107,.15); color: var(--coral); border: 1px solid rgba(255,107,107,.3); }
+
+.score-bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.score-bar-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px;
+  text-align: left;
+}
+.sbi-label { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+.sbi-score { font-size: 20px; font-weight: 700; font-family: 'DM Mono', monospace; }
+.sbi-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.sbi-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .8s ease;
+}
+
+/* 이슈/업무 섹션 */
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 28px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+.section-title::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.issue-list { display: flex; flex-direction: column; gap: 8px; }
+.issue-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+.issue-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.issue-text { line-height: 1.5; }
+.issue-text b { font-weight: 600; color: var(--text); }
+.issue-text span { color: var(--text2); }
+
+.todo-col { display: flex; flex-direction: column; gap: 8px; }
+.todo-item {
+  border-radius: var(--r2);
+  padding: 12px 16px;
+  font-size: 13px;
+  border-left: 3px solid;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0 var(--r2) var(--r2) 0;
+}
+.todo-now { border-left-color: var(--coral); }
+.todo-week { border-left-color: var(--amber); }
+.todo-month { border-left-color: var(--blue); }
+.todo-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.tag-now { color: var(--coral); }
+.tag-week { color: var(--amber); }
+.tag-month { color: var(--blue); }
+
+.reset-btn {
+  display: block;
+  margin: 32px auto 0;
+  padding: 12px 36px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  color: var(--text2);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.reset-btn:hover { border-color: var(--text2); color: var(--text); }
+
+/* 숨김 */
+.page { display: none; }
+.page.active { display: block; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-badge">v4.1 · 5개 마켓 가이드 반영</div>
+  <h1>상품 페이지<br>SEO / AEO / GEO 진단</h1>
+  <p>네이버 · 쿠팡 · 지마켓 · 옥션 · 11번가<br>플랫폼 알고리즘 + 외부 AI 채널 자가진단</p>
+</div>
+
+<!-- 스텝 바 -->
+<div class="steps-bar" id="stepsBar"></div>
+
+<!-- ═══════════════════════════════════════
+     STEP 0 — 기본 정보
+═══════════════════════════════════════ -->
+<div class="page active" id="page0">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(108,99,255,.15);">🏪</div>
+      기본 정보
+    </div>
+    <div class="card-desc">스토어와 상품의 기본 정보를 입력하세요.</div>
+
+    <div class="field">
+      <div class="field-label">스토어명 <span class="required">필수</span></div>
+      <input type="text" id="storeName" placeholder="예: 뽀리스토어">
+    </div>
+    <div class="field">
+      <div class="field-label">진단 플랫폼 <span class="required">필수</span></div>
+      <select id="platform">
+        <option value="">선택하세요</option>
+        <option value="naver">네이버 스마트스토어</option>
+        <option value="coupang">쿠팡</option>
+        <option value="gmarket">지마켓</option>
+        <option value="auction">옥션</option>
+        <option value="11st">11번가</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="field-label">상품 URL 또는 상품번호</div>
+      <input type="text" id="productUrl" placeholder="https://...">
+    </div>
+    <div class="field">
+      <div class="field-label">판매가 (원)</div>
+      <input type="number" id="price" placeholder="예: 25000">
+    </div>
+    <div class="field">
+      <div class="field-label">배송비 (원, 무료이면 0)</div>
+      <input type="number" id="shipping" placeholder="예: 3000">
+    </div>
+    <div class="field">
+      <div class="field-label">재고 수량 <span class="pts">2pt</span></div>
+      <input type="number" id="stock" placeholder="예: 50">
+    </div>
+  </div>
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goStep(1)">다음 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STEP 1 — 상품명 & 카테고리
+═══════════════════════════════════════ -->
+<div class="page" id="page1">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(45,212,191,.15);">📝</div>
+      상품명 & 카테고리
+    </div>
+    <div class="card-desc">등록된 상품명을 그대로 복사해서 붙여넣으세요.</div>
+
+    <div class="field">
+      <div class="field-label" style="justify-content:space-between;align-items:center;">
+        <span>현재 상품명 전체 <span class="required">필수</span> <span class="pts">14pt</span></span>
+        <span id="nameCounter" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);transition:color .2s;">0자</span>
+      </div>
+      <textarea id="productName" placeholder="상품명을 그대로 복사해서 붙여넣으세요" rows="3" oninput="updateNameCounter()"></textarea>
+      <div id="nameLenHint" style="font-size:12px;margin-top:6px;"></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">이벤트/홍보문구 필드 활용 여부 <span class="pts">4pt</span></div>
+      <div class="hint">판매조건·할인정보를 <b>상품명 대신 별도 필드</b>에 입력해야 합니다.<br>네이버=이벤트필드, 쿠팡=노출상품명과 분리, 지마켓=프로모션 상품명, 11번가=홍보문구</div>
+      <div class="radio-group" id="rg_eventField">
+        <label><input type="radio" name="eventField" value="yes">활용 중</label>
+        <label><input type="radio" name="eventField" value="no">미활용 (상품명에 넣음)</label>
+        <label><input type="radio" name="eventField" value="none">해당 없음</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">등록 카테고리 전체 경로 <span class="pts">8pt</span></div>
+      <input type="text" id="category" placeholder="예: 패션잡화 > 양말 > 남성양말 > 단목양말">
+    </div>
+    <div class="field">
+      <div class="field-label">카테고리와 실제 상품이 일치하나요?</div>
+      <div class="radio-group" id="rg_catMatch">
+        <label><input type="radio" name="catMatch" value="yes">일치</label>
+        <label><input type="radio" name="catMatch" value="no">불일치</label>
+        <label><input type="radio" name="catMatch" value="unknown">모르겠음</label>
+      </div>
+    </div>
+
+    <!-- 지마켓 전용 경고 -->
+    <div class="warn" id="gmarketWarn" style="display:none;">
+      ⚠ 지마켓/옥션은 카테고리 등록 후 수정이 불가합니다. 최초 등록 시 정확한 카테고리를 선택하세요.
+    </div>
+
+    <div class="field">
+      <div class="field-label">등록된 태그/검색어 목록 <span class="pts">8pt</span></div>
+      <textarea id="tags" placeholder="네이버: #흰양말 #왕발 #큰발양말&#10;쿠팡/11번가: 흰양말, 왕발, 큰발양말 (콤마 구분)&#10;입력된 태그 전체를 복사해서 붙여넣으세요" rows="3"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">태그/검색어 개수</div>
+      <input type="number" id="tagCount" placeholder="예: 12">
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goStep(0)">← 이전</button>
+    <button class="btn btn-primary" onclick="goStep(2)">다음 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STEP 2 — 이미지 & 미디어
+═══════════════════════════════════════ -->
+<div class="page" id="page2">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(255,107,107,.15);">🖼</div>
+      이미지 & 미디어
+    </div>
+    <div class="card-desc">대표이미지와 추가이미지 현황을 입력하세요.</div>
+
+    <div class="field">
+      <div class="field-label">대표이미지 배경 <span class="pts">4pt</span></div>
+      <div id="bgHint_coupang" class="hint" style="display:none;">🔴 쿠팡은 순백 배경(#ffffff) 필수입니다. 위반 시 노출 정지 가능.</div>
+      <div id="bgHint_gmarket" class="hint" style="display:none;">지마켓: 누끼형(흰배경) 권장, 연출형 허용. 복잡한 배경은 불가.</div>
+      <div id="bgHint_11st" class="hint" style="display:none;">11번가: 단색 배경 권장. 연출 사진은 단독으로만 사용.</div>
+      <div class="radio-group" id="rg_bgType">
+        <label><input type="radio" name="bgType" value="white">순백/흰 배경</label>
+        <label><input type="radio" name="bgType" value="solid">단색 배경</label>
+        <label><input type="radio" name="bgType" value="lifestyle">연출/라이프스타일</label>
+        <label><input type="radio" name="bgType" value="complex">복잡한 배경</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">대표이미지에 텍스트/문구 삽입 여부 <span class="pts">2pt</span></div>
+      <div class="radio-group" id="rg_imgText">
+        <label><input type="radio" name="imgText" value="none">없음</label>
+        <label><input type="radio" name="imgText" value="brand">브랜드 로고만</label>
+        <label><input type="radio" name="imgText" value="promo">할인율·마케팅 문구 있음</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">85% 규칙 — 상품이 이미지 공간의 85% 이상 차지하나요? <span class="pts">2pt</span></div>
+      <div class="hint" style="display:none;" id="rule85hint">쿠팡 공식 요구사항: 상품이 이미지 높이 또는 너비의 85% 이상 차지해야 합니다.</div>
+      <div class="radio-group" id="rg_rule85">
+        <label><input type="radio" name="rule85" value="yes">예 (85% 이상)</label>
+        <label><input type="radio" name="rule85" value="no">아니오 (여백 많음)</label>
+        <label><input type="radio" name="rule85" value="unknown">확인 못함</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">추가이미지 등록 수 <span class="pts">3pt</span></div>
+      <div id="maxImgHint" style="font-size:12px;color:var(--text3);margin-bottom:8px;"></div>
+      <input type="number" id="addImgCount" placeholder="예: 6">
+    </div>
+
+    <div class="field">
+      <div class="field-label">동영상 등록 여부 <span class="pts">1pt</span></div>
+      <div class="radio-group" id="rg_video">
+        <label><input type="radio" name="video" value="yes">등록됨</label>
+        <label><input type="radio" name="video" value="no">미등록</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">이미지 파일명 형태 <span class="pts">4pt · 2층 반영</span></div>
+      <div class="hint">HTML 소스 보기 → img src="" 파일명 확인<br><b>의미있는 단어</b>: product-white-socks-270mm.jpg<br><b>무의미한 숫자</b>: 01.jpg, IMG_3421.jpg</div>
+      <div class="radio-group" id="rg_fileName">
+        <label><input type="radio" name="fileName" value="semantic">의미있는 단어</label>
+        <label><input type="radio" name="fileName" value="numeric">숫자/무의미</label>
+        <label><input type="radio" name="fileName" value="unknown">확인 못함</label>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goStep(1)">← 이전</button>
+    <button class="btn btn-primary" onclick="goStep(3)">다음 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STEP 3 — 상세설명
+═══════════════════════════════════════ -->
+<div class="page" id="page3">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(251,191,36,.15);">📄</div>
+      상세설명
+    </div>
+    <div class="card-desc">가장 배점이 큰 항목입니다. 이미지만으로 구성된 상세설명은 AI·검색엔진이 완전히 읽지 못합니다.</div>
+
+    <div class="field">
+      <div class="field-label">상세설명 구성 방식 <span class="pts">12pt</span></div>
+      <div class="radio-group" id="rg_detailType">
+        <label><input type="radio" name="detailType" value="image_only">이미지만 (텍스트 없음)</label>
+        <label><input type="radio" name="detailType" value="partial">이미지 + 일부 텍스트</label>
+        <label><input type="radio" name="detailType" value="rich">텍스트 풍부 (300자+)</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">상세설명 내 텍스트 내용 요약 (선택)</div>
+      <textarea id="detailSummary" placeholder="소재, 사이즈, 특징, FAQ 등 포함된 텍스트 내용을 간략히 적어주세요" rows="3"></textarea>
+    </div>
+
+    <div class="field">
+      <div class="field-label">FAQ 또는 Q&A 형식 텍스트 포함 여부 <span class="pts">3pt</span></div>
+      <div class="radio-group" id="rg_faq">
+        <label><input type="radio" name="faq" value="yes">있음</label>
+        <label><input type="radio" name="faq" value="no">없음</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">이미지 속 정보가 텍스트로도 존재하나요? <span class="pts">2pt</span></div>
+      <div class="hint">소재·사이즈·특징이 이미지에만 있으면 AI가 읽지 못합니다. 동일 정보를 텍스트로도 기재해야 합니다.</div>
+      <div class="radio-group" id="rg_textDuplicate">
+        <label><input type="radio" name="textDuplicate" value="yes">텍스트에도 있음</label>
+        <label><input type="radio" name="textDuplicate" value="no">이미지에만 있음</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">상세설명 구조화 수준 <span class="pts">4pt · 2층 반영</span></div>
+      <div class="radio-group" id="rg_structLevel">
+        <label><input type="radio" name="structLevel" value="high">소재·사이즈·FAQ 등 명확한 구조</label>
+        <label><input type="radio" name="structLevel" value="low">단순 나열 or 구조 없음</label>
+      </div>
+    </div>
+
+    <div id="coupangDetailHint" class="hint" style="display:none;">
+      쿠팡 권장: 상세설명 이미지 가로 700px 이상, 텍스트 18~24pt 이상 (모바일 가독성)
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goStep(2)">← 이전</button>
+    <button class="btn btn-primary" onclick="goStep(4)">다음 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STEP 4 — 속성 & 정보
+═══════════════════════════════════════ -->
+<div class="page" id="page4">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(96,165,250,.15);">🏷</div>
+      속성 & 필수 정보
+    </div>
+    <div class="card-desc">카테고리 속성값은 검색 필터 노출에 직결됩니다. 미입력 시 필터 검색에서 완전 제외됩니다.</div>
+
+    <div class="field">
+      <div class="field-label">카테고리 속성값 입력률 <span class="pts">4pt</span></div>
+      <div class="radio-group" id="rg_attrRate">
+        <label><input type="radio" name="attrRate" value="all">전부 입력</label>
+        <label><input type="radio" name="attrRate" value="most">대부분 입력 (70%+)</label>
+        <label><input type="radio" name="attrRate" value="some">일부 입력 (50% 미만)</label>
+        <label><input type="radio" name="attrRate" value="none">전부 미입력</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">상품정보제공고시 입력 방식 <span class="pts">2pt</span></div>
+      <div class="hint">소재·치수·제조자·원산지는 반드시 실제값으로 직접 기재해야 합니다.<br>"상품상세참조" 기재 시 AI가 읽을 정보가 없어집니다.</div>
+      <div class="radio-group" id="rg_infoGosi">
+        <label><input type="radio" name="infoGosi" value="direct">직접 기재</label>
+        <label><input type="radio" name="infoGosi" value="mixed">일부 직접 + 일부 참조</label>
+        <label><input type="radio" name="infoGosi" value="ref">전부 상품상세참조</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">브랜드명 입력 여부 <span class="pts">포함</span></div>
+      <div class="radio-group" id="rg_brand">
+        <label><input type="radio" name="brand" value="yes">입력됨</label>
+        <label><input type="radio" name="brand" value="self">자체제작/브랜드없음 선택</label>
+        <label><input type="radio" name="brand" value="no">미입력</label>
+      </div>
+    </div>
+
+    <!-- 카탈로그 매칭 (네이버/쿠팡/지마켓/11번가) -->
+    <div class="field" id="catalogField">
+      <div class="field-label">카탈로그/가격비교 매칭 여부</div>
+      <div id="catalogDesc" style="font-size:12px;color:var(--text3);margin-bottom:8px;"></div>
+      <div class="radio-group" id="rg_catalog">
+        <label><input type="radio" name="catalog" value="yes">매칭됨</label>
+        <label><input type="radio" name="catalog" value="no">미매칭</label>
+        <label><input type="radio" name="catalog" value="unknown">확인 못함</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">배송 설정 <span class="pts">2pt</span></div>
+      <div class="radio-group" id="rg_delivery">
+        <label><input type="radio" name="delivery" value="express">오늘출발/당일출발 설정</label>
+        <label><input type="radio" name="delivery" value="normal">일반배송</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">리뷰 혜택(포인트 등) 설정 여부 <span class="pts">1pt</span></div>
+      <div class="radio-group" id="rg_review">
+        <label><input type="radio" name="review" value="yes">설정됨</label>
+        <label><input type="radio" name="review" value="no">미설정</label>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goStep(3)">← 이전</button>
+    <button class="btn btn-primary" onclick="goStep(5)">다음 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STEP 5 — AI 가시성
+═══════════════════════════════════════ -->
+<div class="page" id="page5">
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:rgba(74,222,128,.15);">🤖</div>
+      외부 AI 채널 가시성
+    </div>
+    <div class="card-desc">ChatGPT·Perplexity에서 직접 테스트한 결과를 입력하세요. 동일 쿼리를 최소 3회 반복해 평균으로 판단하세요.</div>
+
+    <div class="field">
+      <div class="field-label">Meta description 입력 여부 <span class="pts">6pt</span></div>
+      <div id="metaHint_naver" class="hint" style="display:none;">네이버: 검색설정 탭 → Meta description 필드에서 직접 입력 가능합니다. 50~100자 자연어 요약을 권장합니다.</div>
+      <div id="metaHint_other" class="hint" style="display:none;">이 플랫폼은 상품명/설명을 기반으로 Meta description을 자동 생성합니다. 상세설명 첫 문장이 노출됩니다.</div>
+      <div class="radio-group" id="rg_meta">
+        <label><input type="radio" name="meta" value="yes">입력됨 (또는 자동생성 양호)</label>
+        <label><input type="radio" name="meta" value="no">미입력 (공백)</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">ChatGPT 추천 쿼리에서 브랜드/상품 등장 여부 <span class="pts">4pt</span></div>
+      <div class="hint">chat.openai.com → 카테고리 관련 추천 쿼리 5개 입력 → 브랜드명 또는 상품명 등장 확인</div>
+      <div class="radio-group" id="rg_chatgpt">
+        <label><input type="radio" name="chatgpt" value="yes">등장함 (2개+)</label>
+        <label><input type="radio" name="chatgpt" value="partial">1개 등장</label>
+        <label><input type="radio" name="chatgpt" value="no">미등장</label>
+        <label><input type="radio" name="chatgpt" value="skip">테스트 안 함</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Perplexity 동일 쿼리에서 등장 여부 <span class="pts">4pt</span></div>
+      <div class="radio-group" id="rg_perplexity">
+        <label><input type="radio" name="perplexity" value="yes">등장함 (2개+)</label>
+        <label><input type="radio" name="perplexity" value="partial">1개 등장</label>
+        <label><input type="radio" name="perplexity" value="no">미등장</label>
+        <label><input type="radio" name="perplexity" value="skip">테스트 안 함</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">플랫폼 내 현재 검색 노출 순위 <span class="pts">8pt</span></div>
+      <div class="radio-group" id="rg_searchRank">
+        <label><input type="radio" name="searchRank" value="p1">1페이지</label>
+        <label><input type="radio" name="searchRank" value="p2">2~3페이지</label>
+        <label><input type="radio" name="searchRank" value="p4">4페이지 이하</label>
+        <label><input type="radio" name="searchRank" value="unknown">확인 못함</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">네이버 블로그/카페 외부 언급 건수 <span class="pts">6pt · 3층</span></div>
+      <div class="hint">포털 검색 → 브랜드명 → 블로그/카페 탭에서 건수 확인</div>
+      <div class="radio-group" id="rg_external">
+        <label><input type="radio" name="external" value="10plus">10건 이상</label>
+        <label><input type="radio" name="external" value="1to9">1~9건</label>
+        <label><input type="radio" name="external" value="zero">0건/확인불가</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">언론·리뷰 사이트 언급 여부 <span class="pts">4pt · 3층</span></div>
+      <div class="radio-group" id="rg_press">
+        <label><input type="radio" name="press" value="yes">있음</label>
+        <label><input type="radio" name="press" value="no">없음</label>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-outline" onclick="goStep(4)">← 이전</button>
+    <button class="btn btn-result" onclick="calcScore()">진단 결과 보기 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     결과 화면
+═══════════════════════════════════════ -->
+<div class="page result-hidden" id="pageResult">
+  <!-- 총점 -->
+  <div class="score-board">
+    <div class="score-total" id="totalScore">—</div>
+    <div class="score-max">/ 100점</div>
+    <div class="score-grade" id="gradeLabel"></div>
+    <div style="font-size:13px;color:var(--text2);" id="gradeSub"></div>
+    <div class="score-bars">
+      <div class="score-bar-item">
+        <div class="sbi-label">1층 · SEO 구조</div>
+        <div class="sbi-score" id="s1Score">—<span style="font-size:13px;color:var(--text3)">/60</span></div>
+        <div class="sbi-track"><div class="sbi-fill" id="s1Fill" style="background:var(--accent);width:0"></div></div>
+      </div>
+      <div class="score-bar-item">
+        <div class="sbi-label">2층 · AEO 가시성</div>
+        <div class="sbi-score" id="s2Score">—<span style="font-size:13px;color:var(--text3)">/30</span></div>
+        <div class="sbi-track"><div class="sbi-fill" id="s2Fill" style="background:var(--coral);width:0"></div></div>
+      </div>
+      <div class="score-bar-item">
+        <div class="sbi-label">3층 · GEO 채널</div>
+        <div class="sbi-score" id="s3Score">—<span style="font-size:13px;color:var(--text3)">/10</span></div>
+        <div class="sbi-track"><div class="sbi-fill" id="s3Fill" style="background:var(--teal);width:0"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이슈 목록 -->
+  <div class="section-title">항목별 이슈</div>
+  <div class="issue-list" id="issueList"></div>
+
+  <!-- 업무 목록 -->
+  <div class="section-title">최적화 업무 목록</div>
+  <div class="todo-col" id="todoList"></div>
+
+  <button class="reset-btn" onclick="resetAll()">↺ 처음부터 다시 진단</button>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+// ─────────────────────────────────────
+//  상태 & 스텝 관리
+// ─────────────────────────────────────
+const TOTAL_STEPS = 6;
+const stepLabels = ['기본정보','상품명','이미지','상세설명','속성','AI가시성'];
+
+function buildStepsBar() {
+  const bar = document.getElementById('stepsBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const item = document.createElement('div');
+    item.className = 'step-item';
+    item.id = 'step_' + i;
+    item.innerHTML = `<div class="step-num">${i+1}</div><div class="step-label">${stepLabels[i]}</div>`;
+    item.onclick = () => { if (i < currentStep) goStep(i); };
+    bar.appendChild(item);
+    if (i < TOTAL_STEPS - 1) {
+      const sep = document.createElement('div');
+      sep.className = 'step-sep';
+      bar.appendChild(sep);
+    }
+  }
+}
+
+let currentStep = 0;
+
+function goStep(n) {
+  // 유효성 검사
+  if (n > currentStep) {
+    if (currentStep === 0 && !document.getElementById('platform').value) {
+      alert('진단 플랫폼을 선택해 주세요.');
+      return;
+    }
+    if (currentStep === 0 && !document.getElementById('storeName').value.trim()) {
+      alert('스토어명을 입력해 주세요.');
+      return;
+    }
+    if (currentStep === 1 && !document.getElementById('productName').value.trim()) {
+      alert('상품명을 입력해 주세요.');
+      return;
+    }
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page' + n);
+  if (target) {
+    target.classList.add('active');
+    document.getElementById('pageResult').classList.add('result-hidden');
+    document.getElementById('pageResult').classList.remove('active');
+  }
+  currentStep = n;
+  updateStepsBar();
+  updatePlatformHints();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateStepsBar() {
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const el = document.getElementById('step_' + i);
+    el.classList.remove('active','done');
+    if (i === currentStep) el.classList.add('active');
+    else if (i < currentStep) el.classList.add('done');
+  }
+}
+
+function updatePlatformHints() {
+  const p = document.getElementById('platform').value;
+  // 지마켓 카테고리 수정 불가 경고
+  const gw = document.getElementById('gmarketWarn');
+  if (gw) gw.style.display = (p==='gmarket'||p==='auction') ? 'block' : 'none';
+  // 쿠팡 배경 힌트
+  const bc = document.getElementById('bgHint_coupang');
+  const bg = document.getElementById('bgHint_gmarket');
+  const b1 = document.getElementById('bgHint_11st');
+  if(bc) bc.style.display = p==='coupang' ? 'block' : 'none';
+  if(bg) bg.style.display = (p==='gmarket'||p==='auction') ? 'block' : 'none';
+  if(b1) b1.style.display = p==='11st' ? 'block' : 'none';
+  // 85% 힌트
+  const r85 = document.getElementById('rule85hint');
+  if(r85) r85.style.display = p==='coupang' ? 'block' : 'none';
+  // 추가이미지 최대 장수 힌트
+  const mh = document.getElementById('maxImgHint');
+  if(mh){
+    const maxMap = {naver:'최대 9장',coupang:'최대 10장',gmarket:'최대 14장',auction:'최대 14장','11st':'가이드 미명시'};
+    mh.textContent = p ? ('기준: ' + (maxMap[p]||'')) : '';
+  }
+  // 쿠팡 상세설명 힌트
+  const cd = document.getElementById('coupangDetailHint');
+  if(cd) cd.style.display = p==='coupang' ? 'block' : 'none';
+  // Meta description 힌트
+  const mn = document.getElementById('metaHint_naver');
+  const mo = document.getElementById('metaHint_other');
+  if(mn) mn.style.display = p==='naver' ? 'block' : 'none';
+  if(mo) mo.style.display = (p&&p!=='naver') ? 'block' : 'none';
+  // 카탈로그 설명
+  const cd2 = document.getElementById('catalogDesc');
+  if(cd2){
+    const descMap = {
+      naver:'네이버: 가격비교 카탈로그 매칭 여부',
+      coupang:'쿠팡: 아이템마켓(카탈로그) 매칭 여부 — 아이템위너 가격 참고 가능',
+      gmarket:'지마켓: 카탈로그 매칭 여부',
+      auction:'옥션: 카탈로그 매칭 여부',
+      '11st':'11번가: 상품모델 매칭 여부'
+    };
+    cd2.textContent = descMap[p] || '';
+  }
+}
+
+// 라디오 그룹 클릭 이벤트
+document.querySelectorAll('.radio-group').forEach(group => {
+  group.querySelectorAll('label').forEach(label => {
+    label.addEventListener('click', () => {
+      group.querySelectorAll('label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+    });
+  });
+});
+
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : null;
+}
+
+// ─────────────────────────────────────
+//  점수 계산
+// ─────────────────────────────────────
+function calcScore() {
+  const p = document.getElementById('platform').value;
+  const issues = [];
+  const todos = { now:[], week:[], month:[] };
+
+  let s1 = 0, s2 = 0, s3 = 0;
+
+  // ── 1층: 상품명 품질 (14점) ──────────
+  const nameText = document.getElementById('productName').value.trim();
+  const nameLen = nameText.length;
+
+  let namePts = 0;
+  // 글자 수 배점: 50자 이하 만점, 50~60자 감점, 60자 초과 큰 감점
+  if (nameLen >= 20 && nameLen <= 50) namePts += 8;
+  else if (nameLen > 50 && nameLen <= 60) namePts += 5;
+  else if (nameLen >= 10 && nameLen < 20) namePts += 4;
+  else if (nameLen > 60 && nameLen <= 80) namePts += 2;
+  else if (nameLen > 0) namePts += 1;
+
+  // 금지 키워드 체크
+  const badKeywords = ['무료배송','당일발송','빠른배송','할인','특가','최저가','이벤트','쿠폰','적립','사은품','증정','무이자','1+1','긴급','한정','주문폭주','재입고','신상품','정품','공식','인기','추천','최고'];
+  const hasBadKw = badKeywords.some(kw => nameText.includes(kw));
+  if (!hasBadKw && nameLen > 0) namePts += 4;
+
+  // 중복 단어 간단 체크
+  const words = nameText.replace(/[^\w가-힣\s]/g,'').split(/\s+/).filter(w=>w.length>1);
+  const dupes = words.filter((w,i) => words.indexOf(w) !== i);
+  if (dupes.length === 0 && nameLen > 0) namePts += 2;
+
+  namePts = Math.min(14, namePts);
+  s1 += namePts;
+
+  if (nameLen < 20 && nameLen > 0) {
+    issues.push({icon:'✗',text:'<b>상품명이 너무 짧습니다</b> <span>('+nameLen+'자). 20~50자 권장. 핵심 구매 키워드가 부족합니다.</span>'});
+    todos.now.push('상품명 재작성 — [소재/특징]+[상품종류]+[용도/대상]+[사이즈/색상] 순서로 20~50자 작성');
+  } else if (nameLen > 50 && nameLen <= 60) {
+    issues.push({icon:'△',text:'<b>상품명이 50자를 초과합니다</b> <span>('+nameLen+'자). 네이버 기준 50자 이상은 어뷰즈 판단 확률이 높아집니다. 50자 이내로 줄이세요.</span>'});
+    todos.now.push('상품명 단축 — 50자 이내로 핵심 정보만 남기고, 판매조건은 이벤트 필드로 이동');
+  } else if (nameLen > 60) {
+    issues.push({icon:'✗',text:'<b>상품명이 60자를 초과합니다</b> <span>('+nameLen+'자). 모든 마켓에서 어뷰징 페널티 위험. 즉시 단축이 필요합니다.</span>'});
+    todos.now.push('상품명 즉시 단축 — 50자 이내 목표. 불필요한 수식어·반복 키워드 제거, 판매조건은 전용 필드로');
+  }
+  if (hasBadKw) {
+    issues.push({icon:'✗',text:'<b>상품명에 금지 키워드가 있습니다</b> <span>(할인·배송·이벤트 관련 문구). 모든 마켓에서 페널티 원인입니다.</span>'});
+    todos.now.push('상품명 정리 — 할인율·배송·이벤트 문구 제거 후 전용 이벤트/홍보문구 필드에 입력');
+  }
+  if (dupes.length > 0) {
+    issues.push({icon:'△',text:'<b>상품명에 중복 단어가 있습니다</b> <span>('+dupes.slice(0,3).join(', ')+'). 어뷰징으로 인식될 수 있습니다.</span>'});
+    todos.now.push('상품명 중복 단어 제거 — 동의어/유의어 포함 동일 단어 3회 이상 반복 금지');
+  }
+
+  // ── 1층: 이벤트/홍보문구 필드 (4점) ──
+  const eventField = getRadio('eventField');
+  if (eventField === 'yes' || eventField === 'none') {
+    s1 += 4;
+  } else if (eventField === 'no') {
+    issues.push({icon:'✗',text:'<b>이벤트/홍보문구 전용 필드를 활용하지 않고 있습니다</b> <span>판매조건·할인 정보를 상품명에 넣으면 모든 마켓에서 페널티 원인이 됩니다.</span>'});
+    todos.now.push('판매조건·할인정보를 상품명에서 제거 → 플랫폼 전용 필드에 입력 (네이버: 이벤트필드, 쿠팡: 등록상품명과 분리, 지마켓: 프로모션상품명, 11번가: 홍보문구)');
+  }
+
+  // ── 1층: 카테고리 정확성 (8점) ──
+  const catMatch = getRadio('catMatch');
+  if (catMatch === 'yes') {
+    s1 += 8;
+  } else if (catMatch === 'no') {
+    issues.push({icon:'✗',text:'<b>카테고리가 실제 상품과 일치하지 않습니다</b> <span>적합도 점수에 직접 영향을 줍니다.</span>'});
+    todos.now.push('카테고리 재설정 — 실제 상품과 정확히 일치하는 최하위 세부 카테고리 선택' + ((p==='gmarket'||p==='auction')?' (지마켓/옥션은 등록 후 수정 불가 — 새 상품 등록 필요)':''));
+  } else {
+    s1 += 4;
+    issues.push({icon:'△',text:'<b>카테고리 적합 여부를 확인하세요</b> <span>상단 노출 상품의 카테고리를 참고해 비교해 보세요.</span>'});
+  }
+
+  // ── 1층: 태그/검색어 활용도 (8점) ──
+  const tagCount = parseInt(document.getElementById('tagCount').value) || 0;
+  const maxTagMap = {naver:9, coupang:20, gmarket:10, auction:10, '11st':20};
+  const maxTag = maxTagMap[p] || 10;
+  const tagRatio = tagCount / maxTag;
+
+  let tagPts = 0;
+  if (tagRatio >= 0.7) tagPts = 8;
+  else if (tagRatio >= 0.4) tagPts = 5;
+  else if (tagRatio > 0) tagPts = 2;
+  s1 += tagPts;
+
+  if (tagCount === 0) {
+    issues.push({icon:'✗',text:'<b>태그/검색어가 하나도 등록되지 않았습니다</b> <span>카테고리·상품명과 조합되어 검색 확률이 크게 높아집니다.</span>'});
+    todos.now.push('태그/검색어 등록 — 형태·소재·별칭·상위분류·특장점·용도 중심으로 최대 '+maxTag+'개 입력 (카테고리·상품명과 중복 제외)');
+  } else if (tagRatio < 0.7) {
+    issues.push({icon:'△',text:'<b>태그 활용률이 낮습니다</b> <span>('+tagCount+'/'+maxTag+'개). 70% 이상('+Math.ceil(maxTag*0.7)+'개+) 권장합니다.</span>'});
+    todos.now.push('태그 추가 등록 — '+ Math.ceil(maxTag*0.7-tagCount) +'개 이상 추가. 카테고리·상품명에 없는 새로운 키워드 중심');
+  } else {
+    issues.push({icon:'✓',text:'<b>태그 활용률이 우수합니다</b> <span>('+tagCount+'/'+maxTag+'개). 검색어 품질도 주기적으로 점검하세요.</span>'});
+  }
+
+  // ── 1층: 이미지·미디어 (10점) ──
+  const bgType = getRadio('bgType');
+  const imgText = getRadio('imgText');
+  const rule85 = getRadio('rule85');
+  const addImg = parseInt(document.getElementById('addImgCount').value) || 0;
+  const video = getRadio('video');
+
+  let imgPts = 0;
+  // 배경 (4점)
+  if (bgType === 'white') imgPts += 4;
+  else if (bgType === 'solid') imgPts += (p==='coupang' ? 0 : 2);
+  else if (bgType === 'lifestyle') imgPts += (p==='11st'||p==='gmarket'||p==='auction' ? 2 : 0);
+
+  // 텍스트 (2점)
+  if (imgText === 'none') imgPts += 2;
+  else if (imgText === 'brand') imgPts += 1;
+
+  // 추가이미지 (3점)
+  const maxImgMap = {naver:9,coupang:10,gmarket:14,auction:14,'11st':9};
+  const maxI = maxImgMap[p] || 9;
+  if (addImg >= 5) imgPts += 3;
+  else if (addImg >= 3) imgPts += 2;
+  else if (addImg >= 1) imgPts += 1;
+
+  // 동영상 (1점)
+  if (video === 'yes') imgPts += 1;
+
+  s1 += Math.min(10, imgPts);
+
+  if (p === 'coupang' && bgType !== 'white') {
+    issues.push({icon:'✗',text:'<b>쿠팡: 대표이미지 배경이 순백(#ffffff)이 아닙니다</b> <span>위반 시 노출 정지 가능. 즉시 교체가 필요합니다.</span>'});
+    todos.now.push('대표이미지 교체 — 순백(#ffffff) 배경, 상품이 이미지 85% 이상 점유, 텍스트 오버레이 없음');
+  }
+  if (imgText === 'promo') {
+    issues.push({icon:'✗',text:'<b>대표이미지에 마케팅 문구가 있습니다</b> <span>모든 마켓에서 금지 또는 권장하지 않습니다. 검색 알고리즘에도 불이익입니다.</span>'});
+    todos.week.push('대표이미지 재제작 — 할인율·마케팅 문구 제거, 상품만 깔끔하게 노출');
+  }
+  if (addImg < 3) {
+    issues.push({icon:'△',text:'<b>추가이미지가 부족합니다</b> <span>(현재 '+addImg+'장). 5장 이상 등록 권장. 앵글·색상·사이즈별 이미지를 추가하세요.</span>'});
+    todos.week.push('추가이미지 보강 — 5장 이상 등록. 앵글 다양화, 색상별, 착용샷/사용샷 포함');
+  }
+  if (video !== 'yes') {
+    issues.push({icon:'△',text:'<b>동영상이 미등록되어 있습니다</b> <span>플랫폼 노출 가산 요소입니다. 15~30초 제품 소개 영상을 권장합니다.</span>'});
+    todos.month.push('상품 소개 동영상 제작 및 등록 (15~30초, 제품 주요 특징 중심)');
+  }
+
+  // ── 1층: 상세설명 텍스트 (12점) ──
+  const detailType = getRadio('detailType');
+  const faq = getRadio('faq');
+  const textDup = getRadio('textDuplicate');
+  let detailPts = 0;
+
+  if (detailType === 'rich') detailPts += 7;
+  else if (detailType === 'partial') detailPts += 3;
+
+  if (faq === 'yes') detailPts += 3;
+  if (textDup === 'yes') detailPts += 2;
+
+  s1 += Math.min(12, detailPts);
+
+  if (detailType === 'image_only') {
+    issues.push({icon:'✗',text:'<b>상세설명이 이미지만으로 구성되어 있습니다</b> <span>AI·검색엔진이 완전히 읽지 못합니다. AI 추천 확률 0%에 가깝습니다.</span>'});
+    todos.week.push('상세설명 텍스트 추가 — ①상품소개 ②소재정보 ③사이즈안내 ④특징·장점 ⑤세탁·관리법 ⑥FAQ 6블록 최소 300자');
+  } else if (detailType === 'partial') {
+    issues.push({icon:'△',text:'<b>상세설명 텍스트가 부족합니다</b> <span>300자 이상의 구조화된 텍스트가 AI 인용·추천에 필수입니다.</span>'});
+    todos.week.push('상세설명 텍스트 보강 — 소재·사이즈·특징·FAQ를 텍스트로 명시 (목표 300자+)');
+  }
+  if (faq !== 'yes' && detailType !== 'image_only') {
+    todos.week.push('FAQ 섹션 추가 — "Q: 사이즈 관련 / A: 답변" 형식으로 3~5개 질문 포함');
+  }
+  if (textDup !== 'yes') {
+    issues.push({icon:'△',text:'<b>이미지 속 정보가 텍스트로 존재하지 않습니다</b> <span>소재·사이즈 등을 이미지에만 넣으면 AI가 인용할 수 없습니다.</span>'});
+  }
+
+  // ── 1층: 속성·브랜드·정보고시 (4점) ──
+  const attrRate = getRadio('attrRate');
+  const infoGosi = getRadio('infoGosi');
+  const brand = getRadio('brand');
+  let attrPts = 0;
+
+  if (attrRate === 'all') attrPts += 2;
+  else if (attrRate === 'most') attrPts += 1;
+  if (infoGosi === 'direct') attrPts += 1;
+  if (brand === 'yes' || brand === 'self') attrPts += 1;
+
+  s1 += Math.min(4, attrPts);
+
+  if (attrRate === 'none' || attrRate === 'some') {
+    issues.push({icon:'✗',text:'<b>카테고리 속성값이 부족하게 입력되어 있습니다</b> <span>미입력 시 검색 필터에서 완전히 제외됩니다. 모든 속성값을 입력하세요.</span>'});
+    todos.now.push('카테고리 속성값 전체 입력 — 사용계절·소재·대상 등 미선택 항목 모두 채우기');
+  }
+  if (infoGosi === 'ref') {
+    issues.push({icon:'✗',text:'<b>상품정보고시가 전부 "상품상세참조"로 기재되어 있습니다</b> <span>법적 의무 위반 위험 + AI가 읽을 소재·치수 데이터가 없어집니다.</span>'});
+    todos.now.push('상품정보고시 직접 기재 — 소재·치수·제조자·원산지 실제값으로 입력');
+  }
+  if (brand === 'no') {
+    issues.push({icon:'△',text:'<b>브랜드명이 입력되지 않았습니다</b> <span>브랜드 키워드 검색 시 랭킹에 불이익이 생깁니다.</span>'});
+    todos.now.push('브랜드명 등록 또는 "자체제작" 선택');
+  }
+
+  // 재고 (1층 소계에 포함)
+  const stock = parseInt(document.getElementById('stock').value) || 0;
+  if (stock >= 30) s1 += 2;
+  else if (stock >= 10) s1 += 1;
+
+  // 배송/리뷰
+  const delivery = getRadio('delivery');
+  const review = getRadio('review');
+  if (delivery === 'express') s1 += 2;
+  if (review === 'yes') s1 += 1;
+  if (delivery !== 'express') todos.month.push('오늘출발/당일출발 배송 설정 — 인기도 점수 보너스 (네이버), 아이템위너 유리 (쿠팡)');
+  if (review !== 'yes') todos.now.push('리뷰 혜택(포인트 등) 설정 — 구매후기 유도로 인기도 점수 향상');
+
+  s1 = Math.min(60, s1);
+
+  // ── 2층: AEO 가시성 (30점) ──────────
+  const meta = getRadio('meta');
+  const fileName = getRadio('fileName');
+  const structLevel = getRadio('structLevel');
+  const chatgpt = getRadio('chatgpt');
+  const perplexity = getRadio('perplexity');
+  const searchRank = getRadio('searchRank');
+
+  // Meta description (6점)
+  if (meta === 'yes') s2 += 6;
+  else {
+    if (p === 'naver') {
+      issues.push({icon:'✗',text:'<b>Meta description이 입력되지 않았습니다</b> <span>외부 AI 크롤러가 상품을 요약할 때 가장 먼저 읽는 필드입니다. (네이버: 직접 입력 가능)</span>'});
+      todos.now.push('Meta description 입력 — 검색설정 탭 → 50~100자 자연어 요약, 소재·사이즈·특징 포함');
+    }
+  }
+
+  // 이미지 파일명 시맨틱 (4점)
+  if (fileName === 'semantic') s2 += 4;
+  else if (fileName === 'numeric') {
+    issues.push({icon:'△',text:'<b>이미지 파일명이 의미없는 숫자입니다</b> <span>product-color-size.jpg 형태의 시맨틱 파일명이 외부 AI 크롤링에 유리합니다.</span>'});
+    todos.month.push('이미지 파일명 변경 — product-color-size.jpg 형태로 재업로드 (예: white-cotton-socks-270mm.jpg)');
+  }
+
+  // 상세설명 구조화 (4점)
+  if (structLevel === 'high') s2 += 4;
+  else {
+    issues.push({icon:'△',text:'<b>상세설명 구조화 수준이 낮습니다</b> <span>AI가 인용 가능한 명확한 소재·사이즈·FAQ 구조가 필요합니다.</span>'});
+  }
+
+  // LLM 노출 (8점)
+  const cgMap = {yes:4, partial:2, no:0, skip:2};
+  const pxMap = {yes:4, partial:2, no:0, skip:2};
+  s2 += (cgMap[chatgpt] || 0) + (pxMap[perplexity] || 0);
+
+  if (chatgpt === 'no') {
+    issues.push({icon:'✗',text:'<b>ChatGPT 추천 쿼리에서 브랜드가 등장하지 않습니다</b> <span>외부 텍스트 언급과 상세설명 텍스트 보강이 선행되어야 합니다.</span>'});
+  }
+  if (perplexity === 'no') {
+    issues.push({icon:'✗',text:'<b>Perplexity 추천 쿼리에서 브랜드가 등장하지 않습니다</b> <span>실시간 검색 연동 AI로 외부 블로그 언급이 핵심입니다.</span>'});
+  }
+
+  // 플랫폼 검색 순위 (8점)
+  const rankMap = {p1:8, p2:4, p4:1, unknown:2};
+  s2 += (rankMap[searchRank] || 0);
+  if (searchRank === 'p4') {
+    issues.push({icon:'✗',text:'<b>플랫폼 검색 결과 4페이지 이하에 노출됩니다</b> <span>1층 SEO 항목 개선이 선행되어야 합니다.</span>'});
+  }
+
+  s2 = Math.min(30, s2);
+
+  // ── 3층: GEO 외부 채널 (10점) ────────
+  const external = getRadio('external');
+  const press = getRadio('press');
+
+  if (external === '10plus') s3 += 6;
+  else if (external === '1to9') s3 += 3;
+  else {
+    issues.push({icon:'✗',text:'<b>외부 블로그/카페 언급이 없습니다</b> <span>AI 학습 데이터에 포함되지 않아 추천 확률이 0%에 가깝습니다.</span>'});
+    todos.month.push('외부 텍스트 언급 확보 — 브랜드명이 포함된 블로그 리뷰 10건+ 목표 (체험단·협찬 또는 구매 리뷰 유도)');
+  }
+  if (press === 'yes') s3 += 4;
+  else todos.month.push('언론·리뷰 사이트 노출 기획 — 보도자료 배포 또는 전문 리뷰 사이트 협업');
+
+  s3 = Math.min(10, s3);
+
+  // 카탈로그 매칭
+  const catalog = getRadio('catalog');
+  if (catalog === 'no') {
+    const catLabelMap = {naver:'가격비교 카탈로그', coupang:'아이템마켓(카탈로그)', gmarket:'카탈로그', auction:'카탈로그', '11st':'상품모델'};
+    issues.push({icon:'△',text:'<b>'+(catLabelMap[p]||'카탈로그')+'에 매칭되지 않았습니다</b> <span>가격비교 페이지 추가 노출 기회를 놓치고 있습니다.</span>'});
+    todos.week.push((catLabelMap[p]||'카탈로그') + ' 매칭 — 모델명·브랜드 정확 입력으로 자동 매칭 유도');
+  }
+
+  // ─────────────────────────────────────
+  //  결과 렌더링
+  // ─────────────────────────────────────
+  const total = s1 + s2 + s3;
+
+  document.querySelectorAll('.page').forEach(p2 => p2.classList.remove('active'));
+  const rp = document.getElementById('pageResult');
+  rp.classList.remove('result-hidden');
+  rp.classList.add('active');
+
+  document.getElementById('totalScore').textContent = total;
+  document.getElementById('s1Score').innerHTML = s1 + '<span style="font-size:13px;color:var(--text3)">/60</span>';
+  document.getElementById('s2Score').innerHTML = s2 + '<span style="font-size:13px;color:var(--text3)">/30</span>';
+  document.getElementById('s3Score').innerHTML = s3 + '<span style="font-size:13px;color:var(--text3)">/10</span>';
+
+  setTimeout(() => {
+    document.getElementById('s1Fill').style.width = (s1/60*100) + '%';
+    document.getElementById('s2Fill').style.width = (s2/30*100) + '%';
+    document.getElementById('s3Fill').style.width = (s3/10*100) + '%';
+  }, 100);
+
+  const gradeEl = document.getElementById('gradeLabel');
+  const subEl = document.getElementById('gradeSub');
+  if (total >= 70) {
+    gradeEl.textContent = '✦ 양호';
+    gradeEl.className = 'score-grade grade-good';
+    subEl.textContent = '기본 구조 최적화 완료 — 2·3층 심화 강화에 집중하세요';
+  } else if (total >= 45) {
+    gradeEl.textContent = '▲ 보통';
+    gradeEl.className = 'score-grade grade-mid';
+    subEl.textContent = '핵심 항목 일부 누락 — FAIL 항목 우선 수정 후 재측정';
+  } else {
+    gradeEl.textContent = '▼ 즉각 개선';
+    gradeEl.className = 'score-grade grade-bad';
+    subEl.textContent = '기본 구조 미완성 — AI 완전 비가시 상태, 즉시 수행 항목부터 당일 시작';
+  }
+
+  // 이슈 목록
+  const il = document.getElementById('issueList');
+  il.innerHTML = '';
+  if (issues.length === 0) {
+    il.innerHTML = '<div class="issue-item"><div class="issue-icon">✓</div><div class="issue-text">주요 이슈가 발견되지 않았습니다. 2·3층 심화 항목을 점검해 보세요.</div></div>';
+  } else {
+    issues.forEach(iss => {
+      const div = document.createElement('div');
+      div.className = 'issue-item';
+      div.innerHTML = `<div class="issue-icon">${iss.icon}</div><div class="issue-text">${iss.text}</div>`;
+      il.appendChild(div);
+    });
+  }
+
+  // 업무 목록
+  const tl = document.getElementById('todoList');
+  tl.innerHTML = '';
+
+  const addTodos = (items, cls, tagCls, tagText) => {
+    items.forEach(text => {
+      const div = document.createElement('div');
+      div.className = `todo-item ${cls}`;
+      div.innerHTML = `<div class="todo-tag ${tagCls}">${tagText}</div><div>${text}</div>`;
+      tl.appendChild(div);
+    });
+  };
+
+  addTodos(todos.now, 'todo-now', 'tag-now', '즉시 · 당일 완료');
+  addTodos(todos.week, 'todo-week', 'tag-week', '1주 이내');
+  addTodos(todos.month, 'todo-month', 'tag-month', '1개월 내');
+
+  if (todos.now.length + todos.week.length + todos.month.length === 0) {
+    tl.innerHTML = '<div class="todo-item todo-now"><div class="todo-tag tag-now">완료</div><div>모든 즉시 개선 항목이 완료된 상태입니다. 2주 후 검색 순위·AI 노출을 재측정하세요.</div></div>';
+  }
+
+  document.getElementById('stepsBar').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetAll() {
+  document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.value = '');
+  document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+  document.querySelectorAll('.radio-group label').forEach(l => l.classList.remove('selected'));
+  // 카운터 초기화
+  const counter = document.getElementById('nameCounter');
+  const hint = document.getElementById('nameLenHint');
+  if (counter) { counter.textContent = '0자'; counter.style.color = 'var(--text3)'; }
+  if (hint) { hint.textContent = ''; }
+  document.getElementById('stepsBar').style.display = 'flex';
+  currentStep = 0;
+  goStep(0);
+}
+
+// ─────────────────────────────────────
+//  상품명 글자 수 카운터
+// ─────────────────────────────────────
+function updateNameCounter() {
+  const text = document.getElementById('productName').value;
+  const len = text.length;
+  const counter = document.getElementById('nameCounter');
+  const hint = document.getElementById('nameLenHint');
+
+  counter.textContent = len + '자';
+
+  if (len === 0) {
+    counter.style.color = 'var(--text3)';
+    hint.textContent = '';
+  } else if (len <= 50) {
+    counter.style.color = 'var(--green)';
+    hint.style.color = 'var(--green)';
+    hint.textContent = '✓ 적정 범위 (20~50자 권장)';
+  } else if (len <= 60) {
+    counter.style.color = 'var(--amber)';
+    hint.style.color = 'var(--amber)';
+    hint.textContent = '△ 50자 초과 — 네이버 어뷰즈 판단 확률 상승. 단축 권장.';
+  } else {
+    counter.style.color = 'var(--coral)';
+    hint.style.color = 'var(--coral)';
+    hint.textContent = '✗ 60자 초과 — 모든 마켓 페널티 위험. 즉시 단축 필요.';
+  }
+}
+
+// 초기화
+buildStepsBar();
+updateStepsBar();
+updatePlatformHints();
+
+// platform 변경 시 힌트 업데이트
+document.getElementById('platform').addEventListener('change', updatePlatformHints);
+</script>
+</body>
+</html>
